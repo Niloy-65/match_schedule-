@@ -1023,7 +1023,6 @@ function selectTeam(team) {
   if(activeTeam === team) { clearTeamFilter(); return; }
   activeTeam = team;
   document.querySelectorAll('.flag-btn').forEach(b=>b.classList.toggle('selected', b.dataset.team===team));
-  document.getElementById('clearFlagBtn').classList.add('visible');
   renderMatches();
 }
 
