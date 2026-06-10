@@ -498,6 +498,40 @@
     .match-time { font-size: 14px; }
   }
 </style>
+
+
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+  import { getDatabase, ref, runTransaction, onValue } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBDey2zgYqXeG2g8m3Kp2OjJImL05jk0IQ",
+    authDomain: "wc2026-views.firebaseapp.com",
+    databaseURL: "https://wc2026-views-default-rtdb.firebaseio.com",
+    projectId: "wc2026-views",
+    storageBucket: "wc2026-views.firebasestorage.app",
+    messagingSenderId: "462889318223",
+    appId: "1:462889318223:web:0a0ce2197635a65c66773a"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  const viewsRef = ref(db, 'views/total');
+
+  // Count once per session only
+  if (!sessionStorage.getItem('wc2026_counted')) {
+    runTransaction(viewsRef, current => (current || 0) + 1);
+    sessionStorage.setItem('wc2026_counted', '1');
+  }
+
+  // Live update display
+  onValue(viewsRef, snapshot => {
+    const count = snapshot.val() || 0;
+    const el = document.getElementById('viewCount');
+    if (el) el.textContent = count.toLocaleString();
+  });
+</script>
 </head>
 <body>
 
@@ -516,6 +550,10 @@
       <div class="hero-stat"><div class="num">48</div><div class="lbl">Teams</div></div>
       <div class="hero-stat"><div class="num">16</div><div class="lbl">Stadiums</div></div>
       <div class="hero-stat"><div class="num">3</div><div class="lbl">Host Nations</div></div>
+      <div class="hero-stat">
+  <div class="num" id="viewCount">—</div>
+  <div class="lbl">Total Views</div>
+</div>
     </div>
   </div>
 </div>
@@ -588,9 +626,6 @@
 <footer>
   <p>FIFA World Cup 2026 &nbsp;|&nbsp; <span>USA · Canada · Mexico</span> &nbsp;|&nbsp; June 11 – July 19, 2026</p>
   <p style="margin-top:8px">All times shown in Bangladesh Standard Time (BST, UTC+6). Data sourced from official FIFA schedule.</p>
-  <p style="margin-top:8px; font-size: 0.9em; color: #a0aec0;">
-    Develop By : <a href="https://niloy-65.github.io/portfolio1/" target="_blank" style="color: #f59e0b; text-decoration: underline; font-weight: bold;">NA Niloy</a>
-  </p>
 </footer>
 
 <script>
@@ -1023,6 +1058,7 @@ function selectTeam(team) {
   if(activeTeam === team) { clearTeamFilter(); return; }
   activeTeam = team;
   document.querySelectorAll('.flag-btn').forEach(b=>b.classList.toggle('selected', b.dataset.team===team));
+  document.getElementById('clearFlagBtn').classList.add('visible');
   renderMatches();
 }
 
